@@ -1,13 +1,17 @@
 package co.com.pragma.usecase.capacidad;
 
 import co.com.pragma.model.capacidad.Capacidad;
+import co.com.pragma.model.capacidad.CapacidadResponse;
 import co.com.pragma.model.capacidad.Tecnologia;
+import co.com.pragma.model.capacidad.TecnologiaResponse;
 import co.com.pragma.model.capacidad.consumer.TecnologiasRestConsumer;
 import co.com.pragma.model.capacidad.gateways.CapacidadRepository;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,5 +42,24 @@ public class CapacidadUseCase {
 
                     return capacidadRepository.guardarCapacidad(capacidad);
                 });
+    }
+
+    public Flux<CapacidadResponse> obtenerCapacidades(int page, int size, String sortBy, String order) {
+        return capacidadRepository.obtenerCapacidades(page, size, sortBy, order)
+                .flatMap(capacidad ->
+                        tecnologiasConsumer.listarTecnologias().collectMap(Tecnologia::getId, Tecnologia::getNombre)
+                                .map(map -> {
+                                    List<TecnologiaResponse> tecnologias = capacidad.getTecnologias().stream()
+                                            .map(id -> new TecnologiaResponse(id, map.get(id)))
+                                            .toList();
+
+                                    return CapacidadResponse.builder()
+                                            .id(capacidad.getId())
+                                            .nombre(capacidad.getNombre())
+                                            .descripcion(capacidad.getDescripcion())
+                                            .tecnologias(tecnologias)
+                                            .build();
+                                })
+                );
     }
 }
