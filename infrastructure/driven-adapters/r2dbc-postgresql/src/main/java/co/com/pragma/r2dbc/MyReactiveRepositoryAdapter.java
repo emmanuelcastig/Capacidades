@@ -24,7 +24,7 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     public MyReactiveRepositoryAdapter(
             MyReactiveRepository repository,
             CapacidadTecnologiaReactiveRepository capacidadTecnologiaRepository,
-            CapacidadCustomRepository capacidadCustomRepository, // 👈 lo recibes
+            CapacidadCustomRepository capacidadCustomRepository,
             ObjectMapper mapper
     ) {
         super(repository, mapper, d -> mapper.map(d, Capacidad.class));
@@ -54,7 +54,7 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Flux<Capacidad> obtenerCapacidades(int page, int size, String sortBy, String order) {
+    public Flux<Capacidad> obtenerCapacidadesPaginadas(int page, int size, String sortBy, String order) {
         int offset = page * size;
 
         return capacidadCustomRepository.findCapacidadesPaged(sortBy, order, size, offset)
@@ -71,4 +71,19 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
                 );
     }
 
+    @Override
+    public Flux<Capacidad> obtenerTodasLasCapacidades() {
+        return repository.findAll()
+                .concatMap(entity ->
+                        repository.findTecnologiasByCapacidad(entity.getId())
+                                .collectList()
+                                .map(tecnologias -> Capacidad.builder()
+                                        .id(entity.getId())
+                                        .nombre(entity.getNombre())
+                                        .descripcion(entity.getDescripcion())
+                                        .tecnologias(tecnologias)
+                                        .build()
+                                )
+                );
+    }
 }

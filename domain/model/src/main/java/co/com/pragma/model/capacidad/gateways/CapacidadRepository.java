@@ -6,5 +6,6 @@ import reactor.core.publisher.Mono;
 
 public interface CapacidadRepository {
     Mono<Void> guardarCapacidad(Capacidad capacidad);
-    Flux<Capacidad> obtenerCapacidades(int page, int size, String sortBy, String order);
+    Flux<Capacidad> obtenerCapacidadesPaginadas(int page, int size, String sortBy, String order);
+    Flux<Capacidad> obtenerTodasLasCapacidades();
 }

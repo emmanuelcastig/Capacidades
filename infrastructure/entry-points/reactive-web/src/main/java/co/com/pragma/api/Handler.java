@@ -40,7 +40,7 @@ public class Handler {
                 );
     }
 
-    public Mono<ServerResponse> listarCapacidades(ServerRequest serverRequest) {
+    public Mono<ServerResponse> listarCapacidadesPaginadas(ServerRequest serverRequest) {
         int page = Integer.parseInt(serverRequest.queryParam("page").orElse("0"));
         int size = Integer.parseInt(serverRequest.queryParam("size").orElse("10"));
         String sortBy = serverRequest.queryParam("sortBy").orElse("nombre");
@@ -48,10 +48,16 @@ public class Handler {
         log.info("Parametros de paginacion - page: {}, size: {}, sortBy: {}, order: {}", page, size, sortBy, order);
         return ServerResponse.ok()
                 .body(
-                        capacidadUseCase.obtenerCapacidades(page, size, sortBy, order),
+                        capacidadUseCase.obtenerCapacidadesPaginadas(page, size, sortBy, order),
                         CapacidadResponse.class
                 );
     }
+
+    public Mono<ServerResponse> listarCapacidades(ServerRequest serverRequest) {
+        return ServerResponse.ok().body(capacidadUseCase.obtenerTodasLasCapacidades(), CapacidadResponse.class);
+    }
+
+
     public Mono<CapacidadRequest> validacion(CapacidadRequest request) {
         Set<ConstraintViolation<CapacidadRequest>> violaciones = validator.validate(request);
         if (!violaciones.isEmpty()) {

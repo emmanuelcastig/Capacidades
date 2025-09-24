@@ -44,8 +44,27 @@ public class CapacidadUseCase {
                 });
     }
 
-    public Flux<CapacidadResponse> obtenerCapacidades(int page, int size, String sortBy, String order) {
-        return capacidadRepository.obtenerCapacidades(page, size, sortBy, order)
+    public Flux<CapacidadResponse> obtenerCapacidadesPaginadas(int page, int size, String sortBy, String order) {
+        return capacidadRepository.obtenerCapacidadesPaginadas(page, size, sortBy, order)
+                .flatMap(capacidad ->
+                        tecnologiasConsumer.listarTecnologias().collectMap(Tecnologia::getId, Tecnologia::getNombre)
+                                .map(map -> {
+                                    List<TecnologiaResponse> tecnologias = capacidad.getTecnologias().stream()
+                                            .map(id -> new TecnologiaResponse(id, map.get(id)))
+                                            .toList();
+
+                                    return CapacidadResponse.builder()
+                                            .id(capacidad.getId())
+                                            .nombre(capacidad.getNombre())
+                                            .descripcion(capacidad.getDescripcion())
+                                            .tecnologias(tecnologias)
+                                            .build();
+                                })
+                );
+    }
+
+    public Flux<CapacidadResponse> obtenerTodasLasCapacidades() {
+        return capacidadRepository.obtenerTodasLasCapacidades()
                 .flatMap(capacidad ->
                         tecnologiasConsumer.listarTecnologias().collectMap(Tecnologia::getId, Tecnologia::getNombre)
                                 .map(map -> {

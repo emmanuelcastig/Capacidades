@@ -14,6 +14,7 @@ public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/capacidades"), handler::crearCapacidad)
+                .andRoute(GET("/api/v1/capacidades/paginadas"), handler::listarCapacidadesPaginadas)
                 .andRoute(GET("/api/v1/capacidades"), handler::listarCapacidades);
     }
 }
