@@ -6,11 +6,12 @@ import co.com.pragma.r2dbc.entity.CapacidadEntity;
 import co.com.pragma.r2dbc.entity.CapacidadTecnologiasEntity;
 import co.com.pragma.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.pragma.r2dbc.utils.CapacidadCustomRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
+@Slf4j
 @Repository
 public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         Capacidad,
@@ -86,4 +87,30 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
                                 )
                 );
     }
+
+    @Override
+    public Flux<Long> eliminarCapacidad(Long id) {
+        return repository.findTecnologiasByCapacidad(id)
+                .collectList()
+                .flatMapMany(tecnologias ->
+                        // Eliminar primero la capacidad
+                        repository.deleteById(id)
+                                .thenMany(Flux.fromIterable(tecnologias))
+                )
+                .flatMap(tecnologiaId ->
+                        capacidadTecnologiaRepository.findAllByIdTecnologia(tecnologiaId)
+                                .count()
+                                .flatMapMany(count -> {
+                                    if (count == 0) {
+                                        log.info("Se envia la tecnologia: " + tecnologiaId);
+                                        return Flux.just(tecnologiaId); // huérfana → devolverla
+                                    } else {
+                                        return Flux.empty(); // sigue asociada
+                                    }
+                                })
+                );
+
+    }
+
+
 }

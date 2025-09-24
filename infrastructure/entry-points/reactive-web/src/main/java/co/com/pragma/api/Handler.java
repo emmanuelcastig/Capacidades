@@ -57,6 +57,17 @@ public class Handler {
         return ServerResponse.ok().body(capacidadUseCase.obtenerTodasLasCapacidades(), CapacidadResponse.class);
     }
 
+    public Mono<ServerResponse> eliminarCapacidad(ServerRequest serverRequest) {
+        Long id = Long.parseLong(serverRequest.pathVariable("id"));
+        log.info("eliminando capacidad " + id);
+        return capacidadUseCase.eliminarCapacidad(id)
+                .as(transactionalOperator::transactional)
+                .then(ServerResponse.noContent().build())
+                .onErrorResume(IllegalArgumentException.class, e ->
+                        ServerResponse.status(404).bodyValue(e.getMessage())
+                );
+    }
+
 
     public Mono<CapacidadRequest> validacion(CapacidadRequest request) {
         Set<ConstraintViolation<CapacidadRequest>> violaciones = validator.validate(request);

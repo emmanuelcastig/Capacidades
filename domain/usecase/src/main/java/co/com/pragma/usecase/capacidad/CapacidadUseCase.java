@@ -2,8 +2,8 @@ package co.com.pragma.usecase.capacidad;
 
 import co.com.pragma.model.capacidad.Capacidad;
 import co.com.pragma.model.capacidad.CapacidadResponse;
-import co.com.pragma.model.capacidad.Tecnologia;
-import co.com.pragma.model.capacidad.TecnologiaResponse;
+import co.com.pragma.model.capacidad.consumer.Tecnologia;
+import co.com.pragma.model.capacidad.consumer.TecnologiaResponse;
 import co.com.pragma.model.capacidad.consumer.TecnologiasRestConsumer;
 import co.com.pragma.model.capacidad.gateways.CapacidadRepository;
 import lombok.RequiredArgsConstructor;
@@ -80,5 +80,12 @@ public class CapacidadUseCase {
                                             .build();
                                 })
                 );
+    }
+
+    public Mono<Void> eliminarCapacidad(Long id) {
+        return capacidadRepository.eliminarCapacidad(id)
+                .flatMap(tecnologiasConsumer::eliminarTecnologiaHuerfana
+                )
+                .then();
     }
 }

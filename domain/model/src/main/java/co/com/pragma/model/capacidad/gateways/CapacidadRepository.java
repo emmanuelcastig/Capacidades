@@ -8,4 +8,5 @@ public interface CapacidadRepository {
     Mono<Void> guardarCapacidad(Capacidad capacidad);
     Flux<Capacidad> obtenerCapacidadesPaginadas(int page, int size, String sortBy, String order);
     Flux<Capacidad> obtenerTodasLasCapacidades();
+    Flux<Long> eliminarCapacidad(Long id);
 }

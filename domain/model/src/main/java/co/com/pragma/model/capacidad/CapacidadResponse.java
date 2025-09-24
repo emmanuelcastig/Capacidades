@@ -1,5 +1,6 @@
 package co.com.pragma.model.capacidad;
 
+import co.com.pragma.model.capacidad.consumer.TecnologiaResponse;
 import lombok.*;
 
 import java.util.List;
