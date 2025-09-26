@@ -6,7 +6,7 @@ spring:
   devtools:
     add-properties: false
   r2dbc:
-    host: "localhost"
+    host: "db_capacidad"
     port: 5432
     database: "capacidadesDB"
     schema: "public"
@@ -14,11 +14,11 @@ spring:
     password: 1234
   sql:
     init:
-      mode: always
+      mode: never
 adapter:
   restconsumer:
     timeout: 5000
-    url: "http://localhost:8080"
+    url: "http://tecnologia:8080"
 management:
   health:
     circuitbreakers:
